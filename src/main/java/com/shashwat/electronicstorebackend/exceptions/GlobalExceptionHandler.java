@@ -43,9 +43,18 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ResponseMessage> dataIntegrityViolationException(DataIntegrityViolationException ex){
 		ResponseMessage message = ResponseMessage.builder()
 													.message(ex.getRootCause().getMessage().toString())
-													.actionPerformed(true)
+													.actionPerformed(false)
 													.build();
 		return new ResponseEntity<ResponseMessage>(message,HttpStatus.BAD_REQUEST);
 													
+	}
+	
+	@ExceptionHandler(UnsupportedExtensionException.class)
+	public ResponseEntity<ResponseMessage> unsupportedExtensionExceptionHandler(UnsupportedExtensionException ex){
+		ResponseMessage message = ResponseMessage.builder()
+													.message(ex.getMessage())
+													.actionPerformed(false)
+													.build();
+		return new ResponseEntity<ResponseMessage>(message, HttpStatus.BAD_REQUEST);
 	}
 }

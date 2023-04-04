@@ -1,5 +1,6 @@
 package com.shashwat.electronicstorebackend.services;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.shashwat.electronicstorebackend.dtos.UserCreationUpdationDto;
@@ -12,7 +13,7 @@ public interface UserService {
 	UserDto createUser(UserCreationUpdationDto userCreationUpdationDto);
 	
 	// delete user
-	void deleteUser(String id);
+	void deleteUser(String id) throws IOException;
 	
 	// update user
 	UserDto updateUser(UserCreationUpdationDto userCreationUpdationDto, String id);

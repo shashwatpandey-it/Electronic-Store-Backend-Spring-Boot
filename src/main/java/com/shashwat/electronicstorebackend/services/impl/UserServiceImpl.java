@@ -1,11 +1,12 @@
 package com.shashwat.electronicstorebackend.services.impl;
 
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,8 @@ import com.shashwat.electronicstorebackend.utilities.PageableResponse;
 @Service
 public class UserServiceImpl implements UserService {
 	
+	@Value("${user.profile.image.path}")
+	private String imagePath;
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
@@ -38,9 +41,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void deleteUser(String id) {
+	public void deleteUser(String id) throws IOException {
 		// TODO Auto-generated method stub
-		userRepository.deleteById(id);
+		User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
+		if((user.getImageName().equalsIgnoreCase("male-user.png")) || (user.getImageName().equalsIgnoreCase("female-user.png"))) userRepository.deleteById(id);
+		else {
+			Files.delete(Paths.get(imagePath+user.getImageName()));
+			userRepository.deleteById(id);
+		}
 	}
 
 	@Override
