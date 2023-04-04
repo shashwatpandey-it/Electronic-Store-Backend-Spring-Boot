@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.shashwat.electronicstorebackend.dtos.UserCreationUpdationDto;
 import com.shashwat.electronicstorebackend.dtos.UserDto;
+import com.shashwat.electronicstorebackend.utilities.PageableResponse;
 
 public interface UserService {
 
@@ -17,7 +18,7 @@ public interface UserService {
 	UserDto updateUser(UserCreationUpdationDto userCreationUpdationDto, String id);
 	
 	// get all users
-	List<UserDto> getAllUsers();
+	PageableResponse<UserDto> getAllUsers(int pageNumber, int pageSize, String sortBy, String sortDir);
 	
 	// get user by id
 	UserDto getUserById(String id);
@@ -26,5 +27,7 @@ public interface UserService {
 	UserDto getUserByEmail(String email);
 	
 	// search user by name
-	List<UserDto> searchByName(String keyword);
+	PageableResponse<UserDto> searchByName(String keyword, int pageNumber, int pageSize, String sortBy, String sortDir);
+
 }
+

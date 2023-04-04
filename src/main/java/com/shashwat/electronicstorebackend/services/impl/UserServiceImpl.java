@@ -1,19 +1,24 @@
 package com.shashwat.electronicstorebackend.services.impl;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.shashwat.electronicstorebackend.dtos.UserCreationUpdationDto;
 import com.shashwat.electronicstorebackend.dtos.UserDto;
 import com.shashwat.electronicstorebackend.entities.User;
+import com.shashwat.electronicstorebackend.exceptions.ResourceNotFoundException;
 import com.shashwat.electronicstorebackend.repositories.UserRepository;
 import com.shashwat.electronicstorebackend.services.UserService;
+import com.shashwat.electronicstorebackend.utilities.PageableResponse;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -41,7 +46,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDto updateUser(UserCreationUpdationDto userCreationUpdationDto, String id) {
 		// TODO Auto-generated method stub
-		User oldUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User Not Found"));
+		User oldUser = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
 		oldUser.setName(userCreationUpdationDto.getName());
 		oldUser.setSex(userCreationUpdationDto.getSex());
 		oldUser.setAbout(userCreationUpdationDto.getAbout());
@@ -54,31 +59,37 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<UserDto> getAllUsers() {
+	public PageableResponse<UserDto> getAllUsers(int pageNumber, int pageSize, String sortBy, String sortDir) {
 		// TODO Auto-generated method stub
-		List<User> usersList = userRepository.findAll();
-		return usersList.stream().map((user) -> mapper.map(user, UserDto.class)).collect(Collectors.toList());
+		Sort sort = sortDir.equalsIgnoreCase("desc")?Sort.by(sortBy).descending():Sort.by(sortBy).ascending();
+		Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+		Page<User> page = userRepository.findAll(pageable);
+		PageableResponse<UserDto> pageableResponse = PageableResponse.getPageableResponse(UserDto.class, page);
+		return pageableResponse;
 	}
 
 	@Override
 	public UserDto getUserById(String id) {
 		// TODO Auto-generated method stub
-		User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User Not Found"));
+		User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
 		return mapper.map(user, UserDto.class);
 	}
 
 	@Override
 	public UserDto getUserByEmail(String email) {
 		// TODO Auto-generated method stub
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 		return mapper.map(user, UserDto.class);
 	}
 
 	@Override
-	public List<UserDto> searchByName(String keyword) {
+	public PageableResponse<UserDto> searchByName(String keyword, int pageNumber, int pageSize, String sortBy, String sortDir) {
 		// TODO Auto-generated method stub
-		List<User> users = userRepository.findByNameContaining(keyword);
-		return users.stream().map((user) -> mapper.map(user, UserDto.class)).collect(Collectors.toList());
+		Sort sort = sortDir.equalsIgnoreCase("desc")?Sort.by(sortBy).descending():Sort.by(sortBy).ascending();
+		Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+		Page<User> page = userRepository.findByNameContaining(keyword, pageable);
+		PageableResponse<UserDto> pageableResponse = PageableResponse.getPageableResponse(UserDto.class, page);
+		return pageableResponse;
 	}
 	
 }
