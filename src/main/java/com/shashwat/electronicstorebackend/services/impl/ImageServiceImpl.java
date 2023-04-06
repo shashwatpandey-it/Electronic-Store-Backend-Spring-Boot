@@ -17,21 +17,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.shashwat.electronicstorebackend.exceptions.UnsupportedExtensionException;
+import com.shashwat.electronicstorebackend.repositories.CategoryRepository;
 import com.shashwat.electronicstorebackend.repositories.UserRepository;
-import com.shashwat.electronicstorebackend.services.UserImageService;
+import com.shashwat.electronicstorebackend.services.ImageService;
 
 import jakarta.transaction.Transactional;
 
 @Service
-public class UserImageServiceImpl implements UserImageService {
+public class ImageServiceImpl implements ImageService {
 	
-	private Logger logger = LoggerFactory.getLogger(UserImageServiceImpl.class);
+	private Logger logger = LoggerFactory.getLogger(ImageServiceImpl.class);
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private CategoryRepository categoryRepository;
 
 	@Transactional
 	@Override
-	public String uploadImage(MultipartFile file, String path, String id) throws IOException {
+	public String uploadImage(MultipartFile file, String path, String id, String entityName) throws IOException {
 		// TODO Auto-generated method stub
 		String originalFileName = file.getOriginalFilename();
 		logger.info("---- * original file name : {} *----", originalFileName);
@@ -49,7 +52,19 @@ public class UserImageServiceImpl implements UserImageService {
 			}
 			// upload the file(image file) to the desired folder
 			Files.copy(file.getInputStream(), Path.of(fullPathWithFileName));
-			userRepository.updateUserSetImageNameForId(savingFileName, id);
+			switch (entityName) {
+			case "user": {
+				userRepository.updateUserSetImageNameForId(savingFileName, id);
+				break;	
+			}
+			case "category": {
+				categoryRepository.updateCategorySetCoverImageNameForId(savingFileName, id);
+				break;
+			}
+			default:
+				throw new IllegalArgumentException("Unexpected value");
+			}
+			
 			return savingFileName;
 			
 		}

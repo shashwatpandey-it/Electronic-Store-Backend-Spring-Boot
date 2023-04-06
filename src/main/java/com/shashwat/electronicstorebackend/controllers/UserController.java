@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,12 +18,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.shashwat.electronicstorebackend.dtos.UserCreationUpdationDto;
 import com.shashwat.electronicstorebackend.dtos.UserDto;
-import com.shashwat.electronicstorebackend.services.UserImageService;
+import com.shashwat.electronicstorebackend.services.ImageService;
 import com.shashwat.electronicstorebackend.services.UserService;
 import com.shashwat.electronicstorebackend.utilities.PageableResponse;
 import com.shashwat.electronicstorebackend.utilities.ResponseMessage;
@@ -35,18 +37,25 @@ import jakarta.validation.Valid;
 public class UserController {
 	@Value("${user.profile.image.path}")
 	private String imageUploadPath;
-	
+	private static final String ENTITY_USER = "user";
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 	@Autowired
 	private UserService userService;
 	@Autowired
-	private UserImageService userImageService;
+	private ImageService imageService;
 
-	@PostMapping
-	public ResponseEntity<UserDto> createUserEntity(@Valid @RequestBody UserCreationUpdationDto userCreationUpdationDto) throws IOException{
-		String imageName = userImageService.setDefaultImage(userCreationUpdationDto.getSex());
+	@PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<UserDto> createUserEntity(
+			@Valid @RequestPart("data") UserCreationUpdationDto userCreationUpdationDto,
+			@RequestPart("file") MultipartFile file) throws IOException
+	{
+		String imageName = imageService.setDefaultImage(userCreationUpdationDto.getSex());
 		userCreationUpdationDto.setImageName(imageName);
 		UserDto userDto = userService.createUser(userCreationUpdationDto);
+		if(file != null) {
+			String savedImageName = imageService.uploadImage(file, imageUploadPath, userDto.getId(), ENTITY_USER);
+			userDto.setImageName(savedImageName);
+		}
 		LOGGER.info("----* USER CREATED *----");
 		return new ResponseEntity<UserDto>(userDto, HttpStatus.CREATED);
 	}
@@ -113,7 +122,7 @@ public class UserController {
 			@PathVariable("id") String id,
 			@RequestParam MultipartFile file) throws IOException
 	{
-		String imageName = userImageService.uploadImage(file, imageUploadPath, id);
+		String imageName = imageService.uploadImage(file, imageUploadPath, id, ENTITY_USER);
 		ResponseMessage message = ResponseMessage.builder()
 													.message("image uploaded with name : " + imageName)
 													.actionPerformed(true)
@@ -125,7 +134,7 @@ public class UserController {
 	@GetMapping("/image/{id}")
 	public void serveUserImage(@PathVariable("id") String id, HttpServletResponse response) throws IOException {
 		UserDto userDto = userService.getUserById(id);
-		InputStream inputStream = userImageService.getImageResource(imageUploadPath, userDto.getImageName());
+		InputStream inputStream = imageService.getImageResource(imageUploadPath, userDto.getImageName());
 		LOGGER.info("----* USER IMAGE SERVED *----");
 		StreamUtils.copy(inputStream, response.getOutputStream());
 	}
