@@ -52,7 +52,7 @@ public class UserController {
 		String imageName = imageService.setDefaultImage(userCreationUpdationDto.getSex());
 		userCreationUpdationDto.setImageName(imageName);
 		UserDto userDto = userService.createUser(userCreationUpdationDto);
-		if(file != null) {
+		if(!file.isEmpty()) {
 			String savedImageName = imageService.uploadImage(file, imageUploadPath, userDto.getId(), ENTITY_USER);
 			userDto.setImageName(savedImageName);
 		}

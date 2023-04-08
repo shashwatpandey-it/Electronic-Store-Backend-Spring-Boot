@@ -18,8 +18,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.shashwat.electronicstorebackend.exceptions.UnsupportedExtensionException;
 import com.shashwat.electronicstorebackend.repositories.CategoryRepository;
+import com.shashwat.electronicstorebackend.repositories.ProductRepository;
 import com.shashwat.electronicstorebackend.repositories.UserRepository;
 import com.shashwat.electronicstorebackend.services.ImageService;
+import com.shashwat.electronicstorebackend.services.ProductService;
 
 import jakarta.transaction.Transactional;
 
@@ -31,6 +33,8 @@ public class ImageServiceImpl implements ImageService {
 	private UserRepository userRepository;
 	@Autowired
 	private CategoryRepository categoryRepository;
+	@Autowired
+	private ProductRepository productRepository;
 
 	@Transactional
 	@Override
@@ -59,6 +63,10 @@ public class ImageServiceImpl implements ImageService {
 			}
 			case "category": {
 				categoryRepository.updateCategorySetCoverImageNameForId(savingFileName, id);
+				break;
+			}
+			case "product": {
+				productRepository.updateProductSetImageNameForId(savingFileName, id);
 				break;
 			}
 			default:

@@ -53,7 +53,7 @@ public class CategoryController {
 			@RequestPart("file") MultipartFile file) throws IOException
 	{
 		CategoryDto categoryDto2 = categoryService.createCategory(categoryDto);
-		if(file != null) {
+		if(!file.isEmpty()) {
 			String savedImageName = imageService.uploadImage(file, imageUploadPath, categoryDto2.getId(), ENTITY_CATEGORY);
 			categoryDto2.setCoverImageName(savedImageName);
 		}
@@ -110,6 +110,7 @@ public class CategoryController {
 			@PathVariable ("keyword") String keyword)
 	{
 		PageableResponse<CategoryDto> list = categoryService.searchCategories(pageNumber, pageSize, sortBy, sortDir, keyword);
+		LOGGER.info("----* SEARCHED RESULTS *----");
 		return new ResponseEntity<PageableResponse<CategoryDto>>(list, HttpStatus.FOUND);
 	}
 	

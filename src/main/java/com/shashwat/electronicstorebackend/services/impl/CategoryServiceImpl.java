@@ -2,6 +2,7 @@ package com.shashwat.electronicstorebackend.services.impl;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
@@ -44,7 +45,6 @@ public class CategoryServiceImpl implements CategoryService{
 		// TODO Auto-generated method stub
 		Category oldCategory = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No such category exits"));
 		oldCategory.setTitle(categoryDto.getTitle());
-		oldCategory.setCoverImageName(categoryDto.getCoverImageName());
 		Category updatedCategory = categoryRepository.save(oldCategory);
 		return mapper.map(updatedCategory, CategoryDto.class);
 	}
@@ -53,7 +53,10 @@ public class CategoryServiceImpl implements CategoryService{
 	public void deleteCategory(String id) throws IOException {
 		// TODO Auto-generated method stub
 		Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No such category exits"));
-		Files.delete(Paths.get(imagePath+category.getCoverImageName()));
+		Path path = Paths.get(imagePath+category.getCoverImageName());
+		if(Files.exists(path)) {
+			Files.delete(path);
+		}
 		categoryRepository.deleteById(id);	
 	}
 
