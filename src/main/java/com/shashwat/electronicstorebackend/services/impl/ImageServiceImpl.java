@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.shashwat.electronicstorebackend.exceptions.UnsupportedExtensionException;
@@ -23,7 +24,7 @@ import com.shashwat.electronicstorebackend.repositories.UserRepository;
 import com.shashwat.electronicstorebackend.services.ImageService;
 import com.shashwat.electronicstorebackend.services.ProductService;
 
-import jakarta.transaction.Transactional;
+
 
 @Service
 public class ImageServiceImpl implements ImageService {
