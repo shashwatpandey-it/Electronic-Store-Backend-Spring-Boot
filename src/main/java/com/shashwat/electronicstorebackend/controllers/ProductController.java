@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,6 +52,7 @@ public class ProductController {
 	@Autowired
 	private CategoryService categoryService;
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<ProductDto> createProductEntity(
 			@Valid @RequestPart("data") ProductDto productDto,
@@ -65,6 +67,7 @@ public class ProductController {
 		return new ResponseEntity<ProductDto>(productDto2, HttpStatus.CREATED);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping(value = "/in-category/{categoryId}",
 			consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
 	public ResponseEntity<ProductDto> createProductInCategory(
@@ -83,6 +86,7 @@ public class ProductController {
 		return new ResponseEntity<ProductDto>(productDto2, HttpStatus.CREATED);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{id}")
 	public ResponseEntity<ProductDto> updateProductEntity(
 			@Valid @RequestBody ProductDto productDto,
@@ -93,6 +97,7 @@ public class ProductController {
 		return new ResponseEntity<ProductDto>(productDto2, HttpStatus.OK);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ResponseMessage> deleteProductEntity(@PathVariable("id") String id) throws IOException{
 		productService.deleteProduct(id);
@@ -104,6 +109,7 @@ public class ProductController {
 		return new ResponseEntity<ResponseMessage>(message, HttpStatus.OK);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("{productId}/to-category/{categoryId}")
 	public ResponseEntity<ProductDto> moveProductToCategory(
 			@PathVariable("productId") String productId,
@@ -210,6 +216,7 @@ public class ProductController {
 		return new ResponseEntity<PageableResponse<ProductDto>>(list, HttpStatus.FOUND);	
 	}
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/image-upload/{id}")
 	public ResponseEntity<ResponseMessage> uploadProductImage(
 			@PathVariable("id") String id,

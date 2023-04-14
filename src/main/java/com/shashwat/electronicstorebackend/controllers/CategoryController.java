@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,6 +48,7 @@ public class CategoryController {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CategoryController.class);
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<CategoryDto> createCategoryEntity(
 			@Valid @RequestPart("data") CategoryDto categoryDto,
@@ -61,6 +63,7 @@ public class CategoryController {
 		return new ResponseEntity<CategoryDto>(categoryDto2, HttpStatus.CREATED);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{id}")
 	public ResponseEntity<CategoryDto> updateCategoryEntity(
 			@Valid @RequestBody CategoryDto categoryDto,
@@ -71,6 +74,7 @@ public class CategoryController {
 		return new ResponseEntity<CategoryDto>(categoryDto2, HttpStatus.OK);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ResponseMessage> deleteCategoryEntity(@PathVariable ("id") String id) throws IOException{
 		categoryService.deleteCategory(id);
@@ -114,6 +118,7 @@ public class CategoryController {
 		return new ResponseEntity<PageableResponse<CategoryDto>>(list, HttpStatus.FOUND);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/image-upload/{id}")
 	public ResponseEntity<ResponseMessage> uploadCategoryImage(
 			@PathVariable("id") String id,

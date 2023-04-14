@@ -18,6 +18,7 @@ public interface UserService {
 	// update user
 	UserDto updateUser(UserCreationUpdationDto userCreationUpdationDto, String id);
 	
+	UserDto assignRoleAdmin(String userId);
 	// get all users
 	PageableResponse<UserDto> getAllUsers(int pageNumber, int pageSize, String sortBy, String sortDir);
 	

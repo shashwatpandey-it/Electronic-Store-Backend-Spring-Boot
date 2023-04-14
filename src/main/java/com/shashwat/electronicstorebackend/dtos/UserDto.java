@@ -1,7 +1,9 @@
 package com.shashwat.electronicstorebackend.dtos;
 
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,5 +24,6 @@ public class UserDto {
 	private String about;
 	private String email;
 	private String imageName;
+	private Set<RoleDto> roles = new HashSet<>();
 
 }

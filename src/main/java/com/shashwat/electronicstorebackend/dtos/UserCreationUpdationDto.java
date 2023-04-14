@@ -1,5 +1,8 @@
 package com.shashwat.electronicstorebackend.dtos;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.shashwat.electronicstorebackend.utilities.ValidImage;
 
 import jakarta.validation.constraints.NotBlank;
@@ -29,4 +32,5 @@ public class UserCreationUpdationDto {
 	private String password;
 	@ValidImage(message = "Not a valid image name")
 	private String imageName;
+	private Set<RoleDto> roles = new HashSet<>();
 }

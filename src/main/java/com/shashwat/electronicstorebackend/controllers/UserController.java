@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,9 +24,11 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.shashwat.electronicstorebackend.dtos.RoleDto;
 import com.shashwat.electronicstorebackend.dtos.UserCreationUpdationDto;
 import com.shashwat.electronicstorebackend.dtos.UserDto;
 import com.shashwat.electronicstorebackend.services.ImageService;
+import com.shashwat.electronicstorebackend.services.RoleService;
 import com.shashwat.electronicstorebackend.services.UserService;
 import com.shashwat.electronicstorebackend.utilities.PageableResponse;
 import com.shashwat.electronicstorebackend.utilities.ResponseMessage;
@@ -75,6 +79,14 @@ public class UserController {
 	public ResponseEntity<UserDto> updateUserEntity(@Valid @RequestBody UserCreationUpdationDto userCreationUpdationDto, @PathVariable ("id") String id){
 		UserDto userDto = userService.updateUser(userCreationUpdationDto, id);
 		LOGGER.info("----* USER UPDATED *----");
+		return new ResponseEntity<UserDto>(userDto, HttpStatus.OK);
+	}
+	
+	@PreAuthorize("hasRole('ADMIN')")
+	@PutMapping("/{id}/admin")
+	public ResponseEntity<UserDto> makeAdmin(@PathVariable("id") String id){
+		UserDto userDto = userService.assignRoleAdmin(id);
+		LOGGER.info("----* USER IS NOW AN ADMIN *----");
 		return new ResponseEntity<UserDto>(userDto, HttpStatus.OK);
 	}
 	

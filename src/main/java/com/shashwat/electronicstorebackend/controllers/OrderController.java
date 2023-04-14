@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,6 +63,7 @@ public class OrderController {
 		return new ResponseEntity<PageableResponse<OrderDto>>(list, HttpStatus.OK);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/all")
 	public ResponseEntity<PageableResponse<OrderDto>> getAllOrders(
 			@RequestParam (name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
@@ -74,6 +76,7 @@ public class OrderController {
 		return new ResponseEntity<PageableResponse<OrderDto>>(list, HttpStatus.OK);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{orderId}")
 	public ResponseEntity<OrderDto> updateOrder(@PathVariable String orderId, @Valid @RequestBody OrderDto orderDto){
 		OrderDto updatedOrderDto = orderService.updateOrder(orderId, orderDto);
