@@ -10,11 +10,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.shashwat.electronicstorebackend.utilities.ResponseMessage;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.validation.ValidationException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -66,6 +70,24 @@ public class GlobalExceptionHandler {
 													.actionPerformed(false)
 													.build();
 		return new ResponseEntity<ResponseMessage>(message, HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler(ValidationException.class)
+	public ResponseEntity<ResponseMessage> validationExceptionHandler(ValidationException ex){
+		ResponseMessage message = ResponseMessage.builder()
+													.message(ex.getMessage())
+													.actionPerformed(false)
+													.build();
+		return new ResponseEntity<ResponseMessage>(message, HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+	public ResponseEntity<ResponseMessage> httpMediaTypeNotSupportedExceptionHandler(HttpMediaTypeNotSupportedException ex){
+		ResponseMessage message = ResponseMessage.builder()
+				.message(ex.getMessage())
+				.actionPerformed(false)
+				.build();
+return new ResponseEntity<ResponseMessage>(message, HttpStatus.BAD_REQUEST);
 	}
 	
 }

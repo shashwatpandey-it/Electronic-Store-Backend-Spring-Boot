@@ -30,11 +30,14 @@ import com.shashwat.electronicstorebackend.services.ImageService;
 import com.shashwat.electronicstorebackend.utilities.PageableResponse;
 import com.shashwat.electronicstorebackend.utilities.ResponseMessage;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/categories")
+@Tag(name = "Category Module", description = "Endpoints for CRUD operations, fetching and searching operation for product categories")
 public class CategoryController {
 	
 	private static final String ENTITY_CATEGORY = "category";
@@ -49,13 +52,17 @@ public class CategoryController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CategoryController.class);
 	
 	@PreAuthorize("hasRole('ADMIN')")
-	@PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Operation(
+			summary = "Create new category",
+			description = "Create a new category in the system with option to upload category image at the time of creation. This operation can only be performed by admin."
+		)
 	public ResponseEntity<CategoryDto> createCategoryEntity(
 			@Valid @RequestPart("data") CategoryDto categoryDto,
 			@RequestPart("file") MultipartFile file) throws IOException
 	{
 		CategoryDto categoryDto2 = categoryService.createCategory(categoryDto);
-		if(!file.isEmpty()) {
+		if(!(file == null || file.isEmpty())) {
 			String savedImageName = imageService.uploadImage(file, imageUploadPath, categoryDto2.getId(), ENTITY_CATEGORY);
 			categoryDto2.setCoverImageName(savedImageName);
 		}
@@ -65,6 +72,10 @@ public class CategoryController {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{id}")
+	@Operation(
+			summary = "Update category",
+			description = "Update details of an existing category in the system. This operation can only be performed by admin."
+			)
 	public ResponseEntity<CategoryDto> updateCategoryEntity(
 			@Valid @RequestBody CategoryDto categoryDto,
 			@PathVariable ("id") String id)
@@ -76,6 +87,10 @@ public class CategoryController {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
+	@Operation(
+			summary = "Delete category",
+			description = "Delete an existing category from the system. This operation can only be performed by admin."
+		)
 	public ResponseEntity<ResponseMessage> deleteCategoryEntity(@PathVariable ("id") String id) throws IOException{
 		categoryService.deleteCategory(id);
 		ResponseMessage message = ResponseMessage.builder()
@@ -87,6 +102,10 @@ public class CategoryController {
 	}
 	
 	@GetMapping
+	@Operation(
+			summary = "Get all categories",
+			description = "Fetch list of all categories in the system.(Pagination and sorting implemented)"
+		)
 	public ResponseEntity<PageableResponse<CategoryDto>> fetchAllCAtegories(
 			@RequestParam (name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
 			@RequestParam (name = "pageSize", defaultValue = "10", required = false) int pageSize,
@@ -99,6 +118,10 @@ public class CategoryController {
 	}
 	
 	@GetMapping("/{id}")
+	@Operation(
+			summary = "Get category by id",
+			description = "Fetch a particular category with it's id."
+		)
 	public ResponseEntity<CategoryDto> fetchCategoryById(@PathVariable ("id") String id){
 		CategoryDto categoryDto = categoryService.getCategoryById(id);
 		LOGGER.info("----* CATEGORY FETCHED BY ID *----");
@@ -106,6 +129,10 @@ public class CategoryController {
 	}
 	
 	@GetMapping("/search/{keyword}")
+	@Operation(
+			summary = "Search category by name",
+			description = "Search category by name.(Pagination and sorting implemented)"
+		)
 	public ResponseEntity<PageableResponse<CategoryDto>> searchCategory(
 			@RequestParam (name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
 			@RequestParam (name = "pageSize", defaultValue = "10", required = false) int pageSize,
@@ -120,6 +147,10 @@ public class CategoryController {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/image-upload/{id}")
+	@Operation(
+			summary = "Upload category image",
+			description = "Upload image of an existing category. This operation can only be performed by admin."
+		)
 	public ResponseEntity<ResponseMessage> uploadCategoryImage(
 			@PathVariable("id") String id,
 			@RequestParam MultipartFile file) throws IOException
@@ -134,6 +165,10 @@ public class CategoryController {
 	}
 	
 	@GetMapping("/image/{id}")
+	@Operation(
+			summary = "View category image",
+			description = "View image of a particular category."
+		)
 	public void serveCategoryImage(@PathVariable("id") String id, HttpServletResponse response) throws IOException {
 		CategoryDto categoryDto = categoryService.getCategoryById(id);
 		InputStream inputStream = imageService.getImageResource(imageUploadPath, categoryDto.getCoverImageName());

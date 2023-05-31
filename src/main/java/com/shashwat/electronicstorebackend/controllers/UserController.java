@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,21 +22,28 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartRequest;
 
-import com.shashwat.electronicstorebackend.dtos.RoleDto;
 import com.shashwat.electronicstorebackend.dtos.UserCreationUpdationDto;
 import com.shashwat.electronicstorebackend.dtos.UserDto;
 import com.shashwat.electronicstorebackend.services.ImageService;
-import com.shashwat.electronicstorebackend.services.RoleService;
 import com.shashwat.electronicstorebackend.services.UserService;
 import com.shashwat.electronicstorebackend.utilities.PageableResponse;
 import com.shashwat.electronicstorebackend.utilities.ResponseMessage;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
+@Tag(name = "User Module", description = "Endpoints for user management operations")
 public class UserController {
 	@Value("${user.profile.image.path}")
 	private String imageUploadPath;
@@ -48,15 +54,20 @@ public class UserController {
 	@Autowired
 	private ImageService imageService;
 
-	@PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@SecurityRequirements
+	@Operation(
+				summary = "Create new user",
+				description = "Create a new user in the system with option to upload user's profile image at the time of creation."
+			)
 	public ResponseEntity<UserDto> createUserEntity(
 			@Valid @RequestPart("data") UserCreationUpdationDto userCreationUpdationDto,
-			@RequestPart("file") MultipartFile file) throws IOException
+			@RequestPart(name = "file", required = false) MultipartFile file) throws IOException
 	{
 		String imageName = imageService.setDefaultImage(userCreationUpdationDto.getSex());
 		userCreationUpdationDto.setImageName(imageName);
 		UserDto userDto = userService.createUser(userCreationUpdationDto);
-		if(!file.isEmpty()) {
+		if(!(file == null || file.isEmpty())) {
 			String savedImageName = imageService.uploadImage(file, imageUploadPath, userDto.getId(), ENTITY_USER);
 			userDto.setImageName(savedImageName);
 		}
@@ -65,6 +76,10 @@ public class UserController {
 	}
 	
 	@DeleteMapping("/{id}")
+	@Operation(
+				summary = "Delete user",
+				description = "Delete an existing user from the system."
+			)
 	public ResponseEntity<ResponseMessage> deleteUserEntity(@PathVariable ("id") String id) throws IOException{
 		userService.deleteUser(id);
 		LOGGER.info("----* USER DELETED *----");
@@ -76,6 +91,10 @@ public class UserController {
 	}
 	
 	@PutMapping("/{id}")
+	@Operation(
+				summary = "Update user",
+				description = "Update details of an existing user in the system."
+			)
 	public ResponseEntity<UserDto> updateUserEntity(@Valid @RequestBody UserCreationUpdationDto userCreationUpdationDto, @PathVariable ("id") String id){
 		UserDto userDto = userService.updateUser(userCreationUpdationDto, id);
 		LOGGER.info("----* USER UPDATED *----");
@@ -84,6 +103,10 @@ public class UserController {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{id}/admin")
+	@Operation(
+				summary = "Make admin",
+				description = "Make an existing user admin. This operation can only be performed by a user that has a role - admin."
+			)
 	public ResponseEntity<UserDto> makeAdmin(@PathVariable("id") String id){
 		UserDto userDto = userService.assignRoleAdmin(id);
 		LOGGER.info("----* USER IS NOW AN ADMIN *----");
@@ -91,6 +114,10 @@ public class UserController {
 	}
 	
 	@GetMapping
+	@Operation(
+				summary = "Get all users",
+				description = "Fetch list of all users in the system.(Pagination and sorting implemented)"
+			)
 	public ResponseEntity<PageableResponse<UserDto>> fetchAllUserEntity(
 			@RequestParam (value = "pageNumber", defaultValue = "0", required = false) int pageNumber,
 			@RequestParam (value = "pageSize", defaultValue = "10", required = false) int pageSize,
@@ -103,6 +130,10 @@ public class UserController {
 	}
 	
 	@GetMapping("/{id}")
+	@Operation(
+				summary = "Get user by id",
+				description = "Fetch a particular user with his/her id."
+			)
 	public ResponseEntity<UserDto> fetchUserEntityById(@PathVariable ("id") String id){
 		UserDto userDto = userService.getUserById(id);
 		LOGGER.info("----* USER FETCHED BY ID *----");
@@ -110,6 +141,10 @@ public class UserController {
 	}
 	
 	@GetMapping("/email/{email}")
+	@Operation(
+				summary = "Get user by email",
+				description = "Fetch a particular user with his/her email."
+			)	
 	public ResponseEntity<UserDto> fetchUserEntityByEmail(@PathVariable ("email") String email){
 		UserDto userDto = userService.getUserByEmail(email);
 		LOGGER.info("----* USER FETCHED BY EMAIL *----");
@@ -117,6 +152,10 @@ public class UserController {
 	}
 	
 	@GetMapping("/search/{keyword}")
+	@Operation(
+				summary = "Search users",
+				description = "Search users by name.(Pagination and sorting implemented)"
+			)
 	public ResponseEntity<PageableResponse<UserDto>> searchUserEntity(
 			@PathVariable ("keyword") String keyword,
 			@RequestParam (value = "pageNumber", defaultValue = "0", required = false) int pageNumber,
@@ -130,6 +169,10 @@ public class UserController {
 	}
 	
 	@PostMapping("/image-upload/{id}")
+	@Operation(
+				summary = "Upload user image",
+				description = "Upload profile image of an existing user."
+			)
 	public ResponseEntity<ResponseMessage> uploadUserImage(
 			@PathVariable("id") String id,
 			@RequestParam MultipartFile file) throws IOException
@@ -144,6 +187,10 @@ public class UserController {
 	}
 	
 	@GetMapping("/image/{id}")
+	@Operation(
+				summary = "View user image",
+				description = "View image of a particular user."
+			)
 	public void serveUserImage(@PathVariable("id") String id, HttpServletResponse response) throws IOException {
 		UserDto userDto = userService.getUserById(id);
 		InputStream inputStream = imageService.getImageResource(imageUploadPath, userDto.getImageName());

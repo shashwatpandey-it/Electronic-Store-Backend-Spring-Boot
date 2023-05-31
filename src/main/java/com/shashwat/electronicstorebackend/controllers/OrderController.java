@@ -21,10 +21,13 @@ import com.shashwat.electronicstorebackend.services.OrderService;
 import com.shashwat.electronicstorebackend.utilities.PageableResponse;
 import com.shashwat.electronicstorebackend.utilities.ResponseMessage;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/orders")
+@Tag(name = "Order Module", description = "Endpoints for order management")
 public class OrderController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
@@ -33,6 +36,10 @@ public class OrderController {
 	private OrderService orderService;
 	
 	@PostMapping("/{userId}")
+	@Operation(
+				summary = "Place order",
+				description = "Place order for items in the cart."
+			)
 	public ResponseEntity<OrderDto> placeOrder(@PathVariable String userId, @Valid @RequestBody OrderDto orderDto){
 		OrderDto placedOrderDto = orderService.placeOrder(userId, orderDto);
 		LOGGER.info("----* ORDER PLACED *----");
@@ -40,6 +47,10 @@ public class OrderController {
 	}
 	
 	@DeleteMapping("/{orderId}")
+	@Operation(
+				summary = "Cancel order",
+				description = "Cancel a specific order by order id."
+			)
 	public ResponseEntity<ResponseMessage> cancelOrder(@PathVariable String orderId){
 		orderService.cancelOrder(orderId);
 		ResponseMessage message = ResponseMessage.builder()
@@ -51,6 +62,10 @@ public class OrderController {
 	}
 	
 	@GetMapping("/{userId}")
+	@Operation(
+				summary = "Get orders of user",
+				description = "fetch all oders of a user by his/her user id.(Pagination and sorting implemented)"
+			)
 	public ResponseEntity<PageableResponse<OrderDto>> getAllOrdersOfUser(
 			@RequestParam (name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
 			@RequestParam (name = "pageSize", defaultValue = "5", required = false) int pageSize,
@@ -65,6 +80,10 @@ public class OrderController {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/all")
+	@Operation(
+			summary = "Get all orders",
+			description = "fetch all oders in the system. This operation can only be performed by admin.(Pagination and sorting implemented)"
+		)
 	public ResponseEntity<PageableResponse<OrderDto>> getAllOrders(
 			@RequestParam (name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
 			@RequestParam (name = "pageSize", defaultValue = "5", required = false) int pageSize,
@@ -78,6 +97,10 @@ public class OrderController {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{orderId}")
+	@Operation(
+				summary = "Update order",
+				description = "Update placed orders for processing of order. This operation can only be performed by admin."
+			)
 	public ResponseEntity<OrderDto> updateOrder(@PathVariable String orderId, @Valid @RequestBody OrderDto orderDto){
 		OrderDto updatedOrderDto = orderService.updateOrder(orderId, orderDto);
 		LOGGER.info("----* ORDER UPDATED *----");

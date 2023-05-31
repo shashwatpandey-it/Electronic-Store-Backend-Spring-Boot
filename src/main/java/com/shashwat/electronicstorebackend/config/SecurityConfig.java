@@ -32,6 +32,16 @@ public class SecurityConfig {
 	@Autowired
 	private JwtAuthenticationFilter jwtAuthenticationFilter;
 	
+	private final String[] swaggerUrls = {
+			"/swagger-ui.html",
+			"/swagger-ui/**",
+			"/webjars/**",
+			"/swagger-resources/**",
+			"/v2/api-docs",
+			"/v3/api-docs",
+			"/v3/api-docs/**",
+	};
+	
 	@Bean
 	AuthenticationProvider getAuthenticationProvider() {
 		DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
@@ -58,6 +68,10 @@ public class SecurityConfig {
 							.disable()
 							.authorizeHttpRequests()
 							.requestMatchers(HttpMethod.POST, "/users", "/auth/**")
+							.permitAll()
+							.requestMatchers("/test")
+							.permitAll()
+							.requestMatchers(swaggerUrls)
 							.permitAll()
 							.anyRequest()
 							.authenticated()

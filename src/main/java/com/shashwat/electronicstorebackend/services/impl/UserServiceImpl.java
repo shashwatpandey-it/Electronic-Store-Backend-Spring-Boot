@@ -57,10 +57,16 @@ public class UserServiceImpl implements UserService {
 	public void deleteUser(String id) throws IOException {
 		// TODO Auto-generated method stub
 		User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
-		if((user.getImageName().equalsIgnoreCase("male-user.jpg")) || (user.getImageName().equalsIgnoreCase("female-user.png"))) userRepository.deleteById(id);
+		if((user.getImageName().equalsIgnoreCase("male-user.jpg")) || (user.getImageName().equalsIgnoreCase("female-user.png"))) {
+			user.getRoles().clear();
+			userRepository.save(user);
+			userRepository.deleteById(id);
+		}
 		else {
 			Path path = Paths.get(imagePath+user.getImageName());
 			if(Files.exists(path)) Files.delete(path);
+			user.getRoles().clear();
+			userRepository.save(user);
 			userRepository.deleteById(id);
 		}
 	}

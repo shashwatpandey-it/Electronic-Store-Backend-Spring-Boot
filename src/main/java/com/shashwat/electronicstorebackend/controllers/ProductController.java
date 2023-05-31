@@ -34,11 +34,14 @@ import com.shashwat.electronicstorebackend.services.ProductService;
 import com.shashwat.electronicstorebackend.utilities.PageableResponse;
 import com.shashwat.electronicstorebackend.utilities.ResponseMessage;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/products")
+@Tag(name = "Product Module", description = "Endpoints for CRUD operations, fetching and searching operation for products")
 public class ProductController {
 	
 	private static final String ENTITY_PRODUCT = "product";
@@ -53,13 +56,17 @@ public class ProductController {
 	private CategoryService categoryService;
 	
 	@PreAuthorize("hasRole('ADMIN')")
-	@PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Operation(
+				summary = "Create new product",
+				description = "Create a new product in the system with option to upload product's image at the time of creation. This operation can only be performed by admin."
+			)
 	public ResponseEntity<ProductDto> createProductEntity(
 			@Valid @RequestPart("data") ProductDto productDto,
-			@RequestPart("file") MultipartFile file) throws IOException
+			@RequestPart(name = "file", required = false) MultipartFile file) throws IOException
 	{
 		ProductDto productDto2 = productService.createProduct(productDto);
-		if(!file.isEmpty()) {
+		if(!(file == null || file.isEmpty())) {
 			String imageName = imageService.uploadImage(file, imageUploadPath, productDto2.getId(), ENTITY_PRODUCT);
 			productDto2.setImageName(imageName);
 		}
@@ -69,16 +76,21 @@ public class ProductController {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping(value = "/in-category/{categoryId}",
-			consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+				consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE}
+			)
+	@Operation(
+				summary = "Create new product under a category",
+				description = "Create a new product under a category in the system with option to upload product's image at the time of creation. This operation can only be performed by admin."
+			)
 	public ResponseEntity<ProductDto> createProductInCategory(
 			@PathVariable("categoryId") String categoryId,
 			@Valid @RequestPart("data") ProductDto productDto,
-			@RequestPart("file") MultipartFile file) throws IOException
+			@RequestPart(name = "file", required = false) MultipartFile file) throws IOException
 	{
 		CategoryDto categoryDto = categoryService.getCategoryById(categoryId);
 		productDto.addCategory(categoryDto);
 		ProductDto productDto2 = productService.createProduct(productDto);
-		if(!file.isEmpty()) {
+		if(!(file == null || file.isEmpty())) {
 			String imageName = imageService.uploadImage(file, imageUploadPath, productDto2.getId(), ENTITY_PRODUCT);
 			productDto2.setImageName(imageName);
 		}
@@ -88,6 +100,10 @@ public class ProductController {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{id}")
+	@Operation(
+			summary = "Update product",
+			description = "Update details of an existing product in the system. This operation can only be performed by admin."
+			)
 	public ResponseEntity<ProductDto> updateProductEntity(
 			@Valid @RequestBody ProductDto productDto,
 			@PathVariable ("id") String id)
@@ -99,6 +115,10 @@ public class ProductController {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
+	@Operation(
+			summary = "Delete product",
+			description = "Delete an existing product from the system. This operation can only be performed by admin."
+		)
 	public ResponseEntity<ResponseMessage> deleteProductEntity(@PathVariable("id") String id) throws IOException{
 		productService.deleteProduct(id);
 		LOGGER.info("---- * PRODUCT DELETED *----");
@@ -111,6 +131,10 @@ public class ProductController {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("{productId}/to-category/{categoryId}")
+	@Operation(
+				summary = "Move to category",
+				description = "Nove product to a catrgory. This operation can only be performed by admin."
+			)
 	public ResponseEntity<ProductDto> moveProductToCategory(
 			@PathVariable("productId") String productId,
 			@PathVariable("categoryId") String categoryId)
@@ -121,6 +145,10 @@ public class ProductController {
 	}
 	
 	@GetMapping
+	@Operation(
+			summary = "Get all products",
+			description = "Fetch list of all products in the system.(Pagination and sorting implemented)"
+		)
 	public ResponseEntity<PageableResponse<ProductDto>> fetchAllProducts(
 			@RequestParam (name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
 			@RequestParam (name = "pageSize", defaultValue = "10", required = false) int pageSize,
@@ -133,6 +161,10 @@ public class ProductController {
 	}
 	
 	@GetMapping("/{id}")
+	@Operation(
+			summary = "Get product by id",
+			description = "Fetch a particular product with it's id."
+		)
 	public ResponseEntity<ProductDto> fetchProductById(@PathVariable("id") String id){
 		ProductDto productDto = productService.getById(id);
 		LOGGER.info("---- * PRODUCT FETCHED BY ID *----");
@@ -140,6 +172,10 @@ public class ProductController {
 	}
 	
 	@GetMapping("in-category/{categoryId}")
+	@Operation(
+			summary = "Get all products of given category",
+			description = "Fetch list of all products of a particular category in the system.(Pagination and sorting implemented)"
+		)
 	public ResponseEntity<PageableResponse<ProductDto>> productsInCategory(
 			@RequestParam (name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
 			@RequestParam (name = "pageSize", defaultValue = "10", required = false) int pageSize,
@@ -153,6 +189,10 @@ public class ProductController {
 	}
 	
 	@GetMapping("/instock")
+	@Operation(
+			summary = "Get all products in stock",
+			description = "Fetch list of all products which are in stock in the system.(Pagination and sorting implemented)"
+		)
 	public ResponseEntity<PageableResponse<ProductDto>> productsInStock(
 			@RequestParam (name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
 			@RequestParam (name = "pageSize", defaultValue = "10", required = false) int pageSize,
@@ -165,6 +205,10 @@ public class ProductController {
 	}
 	
 	@GetMapping("/search/brand/{keyword}")
+	@Operation(
+			summary = "Search products by manufacturer",
+			description = "Search products by manufacturer.(Pagination and sorting implemented)"
+		)
 	public ResponseEntity<PageableResponse<ProductDto>> searchByManufacturer(
 			@RequestParam (name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
 			@RequestParam (name = "pageSize", defaultValue = "10", required = false) int pageSize,
@@ -178,6 +222,10 @@ public class ProductController {
 	}
 	
 	@GetMapping("/search/{keyword}")
+	@Operation(
+			summary = "Search products by name",
+			description = "Search products by name.(Pagination and sorting implemented)"
+		)
 	public ResponseEntity<PageableResponse<ProductDto>> searchByName(
 			@RequestParam (name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
 			@RequestParam (name = "pageSize", defaultValue = "10", required = false) int pageSize,
@@ -191,6 +239,10 @@ public class ProductController {
 	}
 	
 	@GetMapping("/filter/list-price/{price}")
+	@Operation(
+				summary = "Filter by listed price",
+				description = "Filter products by listed price to get all the products for which listing price is less than the given price.(Pagination and sorting implemented)"
+			)
 	public ResponseEntity<PageableResponse<ProductDto>> filterByListPrice(
 			@RequestParam (name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
 			@RequestParam (name = "pageSize", defaultValue = "10", required = false) int pageSize,
@@ -204,6 +256,10 @@ public class ProductController {
 	}
 	
 	@GetMapping("/filter/discounted-price/{price}")
+	@Operation(
+			summary = "Filter by discounted price",
+			description = "Filter products by discounted price to get all the products for which discounted price is less than the given price.(Pagination and sorting implemented)"
+		)
 	public ResponseEntity<PageableResponse<ProductDto>> filterByDiscountedPrice(
 			@RequestParam (name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
 			@RequestParam (name = "pageSize", defaultValue = "10", required = false) int pageSize,
@@ -218,6 +274,10 @@ public class ProductController {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/image-upload/{id}")
+	@Operation(
+			summary = "Upload product image",
+			description = "Upload product image of an existing product. This operation can only be performed by admin."
+		)
 	public ResponseEntity<ResponseMessage> uploadProductImage(
 			@PathVariable("id") String id,
 			@RequestParam MultipartFile file) throws IOException
@@ -232,6 +292,10 @@ public class ProductController {
 	}
 	
 	@GetMapping("/image/{id}")
+	@Operation(
+			summary = "View product image",
+			description = "View image of a particular product."
+		)
 	public void serveCategoryImage(@PathVariable("id") String id, HttpServletResponse response) throws IOException {
 		ProductDto productDto = productService.getById(id);
 		InputStream inputStream = imageService.getImageResource(imageUploadPath, productDto.getImageName());

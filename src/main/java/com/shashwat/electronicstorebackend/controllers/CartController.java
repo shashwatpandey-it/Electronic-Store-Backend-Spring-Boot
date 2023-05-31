@@ -16,8 +16,12 @@ import com.shashwat.electronicstorebackend.dtos.CartDto;
 import com.shashwat.electronicstorebackend.services.CartService;
 import com.shashwat.electronicstorebackend.utilities.ResponseMessage;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/cart")
+@Tag(name = "Cart Module", description = "Endpoints for cart management")
 public class CartController {
 
 	@Autowired
@@ -26,6 +30,10 @@ public class CartController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CartController.class);
 	
 	@PostMapping("{userId}/product/{productId}")
+	@Operation(
+				summary = "Add to cart",
+				description = "Add products one quantity at a time to cart for user."
+			)
 	public ResponseEntity<CartDto> addToCart(@PathVariable String userId, @PathVariable String productId){
 		CartDto cartDto = cartService.addItemToCart(userId, productId);
 		LOGGER.info("----* PRODUCT ADDED TO CART *----");
@@ -33,6 +41,10 @@ public class CartController {
 	}
 	
 	@DeleteMapping("{userId}/product/{productId}")
+	@Operation(
+				summary = "Remove from cart",
+				description = "Remove products one quantity at a time from cart of a user."
+			)
 	public ResponseEntity<ResponseMessage> removeFromCart(@PathVariable String userId, @PathVariable String productId){
 		cartService.removeItemFromCart(userId, productId);
 		ResponseMessage message = ResponseMessage.builder()
@@ -44,6 +56,10 @@ public class CartController {
 	}
 	
 	@DeleteMapping("{userId}/clear")
+	@Operation(
+				summary = "Clear cart",
+				description = "Clear all items from the cart of user and make the cart blank."
+			)
 	public ResponseEntity<ResponseMessage> clearCart(@PathVariable String userId){
 		cartService.clearCart(userId);
 		ResponseMessage message = ResponseMessage.builder()
@@ -55,6 +71,10 @@ public class CartController {
 	}
 	
 	@GetMapping("/{userId}")
+	@Operation(
+				summary = "Get cart",
+				description = "Get the cart of particular user by his/her id."
+			)
 	public ResponseEntity<CartDto> getCartOfUser(@PathVariable String userId){
 		CartDto cartDto = cartService.getCart(userId);
 		LOGGER.info("----* CART FETCHED *----");
