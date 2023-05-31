@@ -6,7 +6,7 @@ The Electronic Store Backend Application is a comprehensive backend solution for
 ## API Endpoints
 The application exposes a comprehensive set of API endpoints, allowing for seamless interaction with the electronic store. The available endpoints encompass essential functionalities, such as user management, category management, product management, cart management, and order management. These endpoints enable operations such as user creation, updating user information, category creation, retrieval of categories, product creation and updates, cart manipulation, and order placement.
 
-For detailed documentation on the API endpoints, request and response formats, please refer to the Swagger UI documentation.
+For detailed documentation on the API endpoints, request and response formats, please refer to the Swagger UI documentation:
 http://server9470.duckdns.org:9080/swagger-ui/index.html
 
 ## Authentication and Authorization
