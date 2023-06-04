@@ -9,6 +9,10 @@ The application exposes a comprehensive set of API endpoints, allowing for seaml
 For detailed documentation on the API endpoints, request and response formats, please refer to the Swagger UI documentation:
 http://server9470.duckdns.org:9080/swagger-ui/index.html
 
+**Note:** For testing GET requests test-user credentials can be used as given:       
+username - test-user@api.io       
+password - test
+
 ## Authentication and Authorization
 The Electronic Store Backend Application incorporates robust security measures through the implementation of Spring Security. It leverages the use of JSON Web Tokens (JWT) for authentication, providing secure access to the API endpoints. Upon successful login, users obtain an access token, which is subsequently used to authenticate subsequent API requests.
 
